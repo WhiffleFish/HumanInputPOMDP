@@ -8,6 +8,6 @@ using StaticArrays
 # play(game)
 
 ##
-game = UpdatingGame()
+game = MCMCGame()
 
 play(game)

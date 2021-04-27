@@ -12,7 +12,7 @@ using Parameters
     reward_variance::Float64 = 5.0
 end
 
-@with_kw mutable struct UpdatingGame
+@with_kw mutable struct IMGame
     solver::MCTSSolver = MCTSSolver(n_iterations=1000, depth=40, exploration_constant=10.0, enable_tree_vis=true)
     s0::SVector{2,Int} = SA[1,1]
     max_steps::Int = 30
@@ -20,14 +20,6 @@ end
     reward_variance::Float64 = 5.0
     pred_mdp::SimpleGridWorld = genMDP(true_mdp, reward_variance)
     C::Int = 1 # Start at 1 to prevent NaN if first input is 0 confidence
-end
-
-function sanitize_input(input::String)
-    if (1 <= length(input) <= 2) && (tryparse(Int, input[2]) != nothing) && (lowercase(input[1]) ∈ ["b","o"])
-        return (lowercase(input[1]), input[2])
-    else
-        return (nothing, nothing)
-    end
 end
 
 function play(game::Game)
@@ -74,13 +66,14 @@ function play(game::Game)
     end
 end
 
-function play(game::UpdatingGame; show_true=false)
+function play(game::IMGame; show_true=false)::Float64
     solver = game.solver
     s = game.s0
     steps = game.max_steps
     true_rewards = reward_grid(game.true_mdp)
     var = game.reward_variance
     total_reward = 0.0
+    γ = discount(game.true_mdp)
 
     aut_steps = 0
     for i = 1:steps
@@ -147,12 +140,13 @@ function play(game::UpdatingGame; show_true=false)
         end
 
         s,r = @gen(:sp,:r)(game.true_mdp,s,a)
-        total_reward += r
+        total_reward += r*γ^(i-1)
         aut_steps -= 1
     end
+    return total_reward
 end
 
-function update_rewards!(game::UpdatingGame, mdp::SimpleGridWorld, confidence::Int)::Nothing
+function update_rewards!(game::IMGame, mdp::SimpleGridWorld, confidence::Int)::Nothing
     println("Pre-update")
     @show game.pred_mdp.rewards
     game.C += confidence

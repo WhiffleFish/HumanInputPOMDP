@@ -3,10 +3,10 @@ using StaticArrays
 using Parameters
 using Random
 using Distributions
-using POMDPModelTools
-using DiscreteValueIteration
-using POMDPSimulators
-using POMDPPolicies: FunctionPolicy
+# using POMDPModelTools
+# using DiscreteValueIteration
+# using POMDPSimulators
+# using POMDPPolicies: FunctionPolicy
 include("birl.jl")
 
 
@@ -14,7 +14,7 @@ const GWPos = SVector{2,Int}
 const DEFAULT_SIZE = (100,100)
 const RD = 20
 
-struct MDPPlus{M<:MDP} 
+struct MDPPlus{M<:MDP}
     m::M
     b::Updater
 end
@@ -29,13 +29,13 @@ end
     reward_belief::RewardCollection = nothing
 end
 
-struct SimpleGridWorld <: MDP{GWPos, Symbol}
-    size::Tuple{Int, Int}           
-    rewards::Dict{GWPos, Float64}   
-    terminate_from::Set{GWPos}     
-    tprob::Float64                  
-    discount::Float64               
-end
+# struct SimpleGridWorld <: MDP{GWPos, Symbol}
+#     size::Tuple{Int, Int}
+#     rewards::Dict{GWPos, Float64}
+#     terminate_from::Set{GWPos}
+#     tprob::Float64
+#     discount::Float64
+# end
 
 function SimpleGridWorld(Dict)
     size = (10,10)

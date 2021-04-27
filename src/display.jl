@@ -113,7 +113,7 @@ function render(grid::Matrix{Float64}, pos::Union{Vector{Int},SVector{2,Int}}, p
         clipreset()
 
     end
-    setline(10)
+    setline(20)
     op = 1/(0.5*length(paths))
     setopacity(min(1, op))
     sethue("blue")
@@ -169,7 +169,7 @@ function render(grid::Matrix{Float64}, pos::Union{Vector{Int},SVector{2,Int}}, p
         clipreset()
 
     end
-    setline(10)
+    setline(20)
     op = 1/(0.5*length(path1))
     setopacity(min(1, op))
     sethue("blue")

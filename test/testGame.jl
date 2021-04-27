@@ -7,6 +7,6 @@ using StaticArrays
 # play(game)
 
 ##
-game = UpdatingGame(reward_variance=10.0, s0=SA[5,5])
+game = IMGame(reward_variance=10.0, s0=SA[5,5])
 
 play(game)

@@ -3,10 +3,10 @@ using StaticArrays
 using Parameters
 using Random
 using Distributions
-using POMDPModelTools
-using DiscreteValueIteration
-using POMDPSimulators
-using POMDPPolicies: FunctionPolicy
+# using POMDPModelTools
+# using DiscreteValueIteration
+# using POMDPSimulators
+# using POMDPPolicies: FunctionPolicy
 using LinearAlgebra
 using Statistics
 using MCTS
@@ -60,7 +60,7 @@ function logp(i, w, phi_As, phi_Bs, prefs, delta, alphas)
     phi_B = phi_Bs[i]
     a = prefs[i]
     alpha = alphas[i]
-    
+
     if a != 0
         if a < 0
             # psi = phi_A - phi_B

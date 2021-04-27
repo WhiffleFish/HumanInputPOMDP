@@ -5,35 +5,16 @@ include("mdp.jl")
 using StaticArrays
 using Parameters
 
-@with_kw struct Game
-    solver::MCTSSolver = MCTSSolver(n_iterations=1000, depth=40, exploration_constant=5.0, enable_tree_vis=true)
-    s0::SVector{2,Int} = SA[1,1]
-    max_steps::Int = 30
-    true_mdp::SimpleGridWorld = SimpleGridWorld()
-    reward_variance::Float64 = 5.0
-end
-
-@with_kw mutable struct UpdatingGame
+@with_kw mutable struct MCMCGame
     solver::MCTSSolver = MCTSSolver(n_iterations=1000, depth=40, exploration_constant=10.0, enable_tree_vis=true)
     s0::SVector{2,Int} = SA[5,5]
     max_steps::Int = 30
     true_mdp::SimpleGridWorld = SimpleGridWorld()
-    reward_ranges::Array{Tuple{Float64, Float64}, 1} = [(-15.0, 15.0), (-15.0, 15.0), (-15.0, 15.0), (-15.0, 15.0)] 
-    # reward_variance::Float64 = 5.0
+    reward_ranges::Array{Tuple{Float64, Float64}, 1} = [(-15.0, 15.0), (-15.0, 15.0), (-15.0, 15.0), (-15.0, 15.0)]
     reward_belief::Array{Array{Float64,1},1}= [rand(4)]
-    # pred_mdp::SimpleGridWorld = genMDP(true_mdp, belief)
-    # C::Int = 1 # Start at 1 to prevent NaN if first input is 0 confidence
 end
 
-function sanitize_input(input::String)
-    if (1 <= length(input) <= 2) && (tryparse(Int, input[2]) != nothing) && (lowercase(input[1]) ∈ ["b","o"])
-        return (lowercase(input[1]), input[2])
-    else
-        return (nothing, nothing)
-    end
-end
-
-function play(game::UpdatingGame; show_true=false)
+function play(game::MCMCGame; show_true=false)
     solver = game.solver
     s = game.s0
     steps = game.max_steps
@@ -142,7 +123,7 @@ function play(game::UpdatingGame; show_true=false)
     end
 end
 
-function update_rewards!(game::UpdatingGame, phi_As, phi_Bs, prefs, confidences)::Nothing
+function update_rewards!(game::MCMCGame, phi_As, phi_Bs, prefs, confidences)::Nothing
 
     # @show mean(game.reward_belief)
     # @show phi_A
