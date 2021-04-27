@@ -1,0 +1,155 @@
+using MCTS
+using POMDPs
+# using POMDPModels
+include("mdp.jl")
+using StaticArrays
+using Parameters
+
+@with_kw struct Game
+    solver::MCTSSolver = MCTSSolver(n_iterations=1000, depth=40, exploration_constant=5.0, enable_tree_vis=true)
+    s0::SVector{2,Int} = SA[1,1]
+    max_steps::Int = 30
+    true_mdp::SimpleGridWorld = SimpleGridWorld()
+    reward_variance::Float64 = 5.0
+end
+
+@with_kw mutable struct UpdatingGame
+    solver::MCTSSolver = MCTSSolver(n_iterations=1000, depth=40, exploration_constant=10.0, enable_tree_vis=true)
+    s0::SVector{2,Int} = SA[5,5]
+    max_steps::Int = 30
+    true_mdp::SimpleGridWorld = SimpleGridWorld()
+    reward_ranges::Array{Tuple{Float64, Float64}, 1} = [(-15.0, 15.0), (-15.0, 15.0), (-15.0, 15.0), (-15.0, 15.0)] 
+    # reward_variance::Float64 = 5.0
+    reward_belief::Array{Array{Float64,1},1}= [rand(4)]
+    # pred_mdp::SimpleGridWorld = genMDP(true_mdp, belief)
+    # C::Int = 1 # Start at 1 to prevent NaN if first input is 0 confidence
+end
+
+function sanitize_input(input::String)
+    if (1 <= length(input) <= 2) && (tryparse(Int, input[2]) != nothing) && (lowercase(input[1]) ∈ ["b","o"])
+        return (lowercase(input[1]), input[2])
+    else
+        return (nothing, nothing)
+    end
+end
+
+function play(game::UpdatingGame; show_true=false)
+    solver = game.solver
+    s = game.s0
+    steps = game.max_steps
+    true_rewards = reward_grid(game.true_mdp)
+    total_reward = 0.0
+
+    phi_As = []
+    phi_Bs = []
+    prefs = []
+    confidences = []
+    aut_steps = 0
+    for i = 1:steps
+        println("\nStep: $i")
+
+        if isterminal(game.true_mdp, s)
+            println("Game over")
+            println("Final Score: $total_reward")
+            break
+        end
+
+        #User Input
+        if aut_steps <= 0
+            if isterminal(game.true_mdp, s)
+                println("Game over")
+                println("Final Score: $total_reward")
+                break
+            end
+            mdp_main, phi_A = meanMDP(game.reward_belief, game.reward_ranges)
+            # mdp_main, phi_A = genVarMDP(game.reward_belief ,game.reward_ranges)
+            # mdp_alt, phi_B = genMDP(game.reward_belief, game.reward_ranges)
+            mdp_alt, phi_B = genVarMDP(game.reward_belief , game.reward_ranges)
+
+            @show phi_A, phi_B
+            println("a")
+            @show mdp_main.rewards
+            a_blue, tree_blue = solved_mdp(mdp_main, solver, s)
+            println("b")
+            @show mdp_alt.rewards
+            a_orange, tree_orange = solved_mdp(mdp_alt, solver, s)
+            while (a_orange == a_blue)
+                mdp_alt, phi_B = genVarMDP(game.reward_belief , game.reward_ranges)
+                a_orange, tree_orange = solved_mdp(mdp_alt, solver, s)
+                # println("yes")
+            end
+            paths_b = get_trajectories(mdp_main,tree_blue, 100, 50)
+            paths_o = get_trajectories(mdp_alt,tree_orange, 100, 50)
+            if show_true
+                display(render(true_rewards, s, paths_b, paths_o))
+            else
+                display(render(reward_grid(mdp_main), s, paths_b, paths_o))
+            end
+            println("[B]lue or [O]range?")
+            input = split(readline())
+            aut_steps = 1
+            if length(input) == 0
+                confidence = 1.0
+                choice = "s"
+            elseif length(input) == 1
+                confidence = 1.0
+                choice = lowercase(input[1])
+            elseif length(input) == 3
+                choice = lowercase(input[1])
+                confidence = tryparse(Int, input[2])
+                aut_steps = tryparse(Int, input[3])
+            elseif length(input) == 2
+                choice = lowercase(input[1])
+                confidence = tryparse(Int, input[2])
+            else
+                println("Invalid Input")
+                break
+            end
+
+            if choice == "b"
+                pref = 1
+                a = a_blue
+            elseif choice == "o"
+                pref = -1
+                a = a_orange
+            elseif choice == "s"
+                pref = 0
+                a = a_blue
+            else
+                println("Invalid Input")
+                break
+            end
+            push!(phi_As, phi_A)
+            push!(phi_Bs, phi_B)
+            push!(prefs, pref)
+            push!(confidences, confidence)
+            update_rewards!(game, phi_As, phi_Bs, prefs, confidences)
+            # mdp_main, phi_A = meanMDP(game.reward_belief, game.reward_ranges)
+            # a, tree_blue = solved_mdp(mdp_main, solver, s)
+        else
+            a, tree_blue = solved_mdp(mdp_main, solver, s)
+            paths_b = get_trajectories(mdp_main,tree_blue, 100, 50)
+            if show_true
+                display(render(true_rewards, s, paths_b))
+            else
+                display(render(reward_grid(mdp_main), s, paths_b))
+            end
+        end
+
+        s,r = @gen(:sp,:r)(game.true_mdp,s,a)
+        total_reward += r
+        aut_steps -= 1
+    end
+end
+
+function update_rewards!(game::UpdatingGame, phi_As, phi_Bs, prefs, confidences)::Nothing
+
+    # @show mean(game.reward_belief)
+    # @show phi_A
+    # @show phi_B
+    reward_values = policy_walk(mean(game.reward_belief), phi_As, phi_Bs, prefs, confidences)
+    sort!(reward_values, lt=my_compare)
+    game.reward_belief = reward_values
+    @show mean(reward_values)
+    nothing
+end
