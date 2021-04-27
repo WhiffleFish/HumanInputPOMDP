@@ -1,4 +1,5 @@
 using POMDPs
+using MCTS
 function get_trajectory(mdp::SimpleGridWorld, tree::MCTS.MCTSTree{SVector{2, Int64}, Symbol}, d::Int)::Vector{SVector{2, Int64}}
     root = first(tree.s_labels)
     state_hist = SVector{2,Int64}[root]
@@ -37,7 +38,7 @@ end
 function genMDP(mdp::SimpleGridWorld = SimpleGridWorld(), std::Float64=10.0)::SimpleGridWorld
     new_mdp = SimpleGridWorld()
     for (k,v) in mdp.rewards
-        new_mdp.rewards[k] += randn()*std
+        new_mdp.rewards[k] = mdp.rewards[k] + randn()*std
     end
     return new_mdp
 end

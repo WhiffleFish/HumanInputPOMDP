@@ -43,15 +43,6 @@ tree2 = info2[:tree]
 
 ##
 
-
-for i = 1:1
-    Drawing(1000,1000)
-    origin()
-    background("black")
-    sethue("red")
-    fontsize(50)
-end
-
 t_paths = get_trajectories(true_mdp,true_tree, 100, 50)
 paths1 = get_trajectories(mdp1,tree1, 100, 50)
 paths2 = get_trajectories(mdp2,tree2, 100, 50)

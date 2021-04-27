@@ -65,7 +65,6 @@ function play(game::Game)
         elseif choice == "o"
             a = a_orange
         else
-
             println("Invalid Input")
             break
         end
