@@ -1,9 +1,6 @@
 using Plots
 using Luxor
-
-struct Grid
-    rewards::Matrix{Float64}
-end
+using StaticArrays
 
 function render(grid::Matrix{Float64}; show_vals::Bool=true)
     s = [500,500]
@@ -74,7 +71,7 @@ function render(grid::Matrix{Float64}, pos::Vector{Int}; show_vals::Bool=true)
     preview()
 end
 
-function render(grid::Matrix{Float64}, pos::Vector{Int}, paths::Vector{Vector{SVector{2,Int64}}}; show_vals::Bool=true)
+function render(grid::Matrix{Float64}, pos::Union{Vector{Int},SVector{2,Int}}, paths::Vector{Vector{SVector{2,Int64}}}; show_vals::Bool=true)
     s = [500,500]
     term_state = SA[-1,-1]
     ds = 500/10
@@ -93,8 +90,13 @@ function render(grid::Matrix{Float64}, pos::Vector{Int}, paths::Vector{Vector{SV
     grid_min = min(grid...)
     for (pos, n) in tiles
         box(pos+offset, tiles.tilewidth*0.98, tiles.tileheight*0.98, :clip)
-        intensity = (grid[n]-grid_min)/(grid_max-grid_min)
-        background(colors[intensity])
+
+        if grid[n] == 0.0
+            background("white")
+        else
+            intensity = (grid[n]-grid_min)/(grid_max-grid_min)
+            background(colors[intensity])
+        end
 
         sethue("black")
         if show_vals
@@ -111,7 +113,7 @@ function render(grid::Matrix{Float64}, pos::Vector{Int}, paths::Vector{Vector{SV
         clipreset()
 
     end
-    setline(10)
+    setline(20)
     op = 1/(0.5*length(paths))
     setopacity(min(1, op))
     sethue("blue")
@@ -121,10 +123,6 @@ function render(grid::Matrix{Float64}, pos::Vector{Int}, paths::Vector{Vector{SV
         poly(pts, :stroke)
     end
 
-    # polysmooth([Point(25,25), Point(125,25), Point(125,125)], 5, :stroke)
-
-
-    # poly([Point(25,25), Point(125,25), Point(125,125)], :stroke)
     finish()
     preview()
 end
@@ -148,8 +146,13 @@ function render(grid::Matrix{Float64}, pos::Union{Vector{Int},SVector{2,Int}}, p
     grid_min = min(grid...)
     for (pos, n) in tiles
         box(pos+offset, tiles.tilewidth*0.98, tiles.tileheight*0.98, :clip)
-        intensity = (grid[n]-grid_min)/(grid_max-grid_min)
-        background(colors[intensity])
+
+        if grid[n] == 0.0
+            background("white")
+        else
+            intensity = (grid[n]-grid_min)/(grid_max-grid_min)
+            background(colors[intensity])
+        end
 
         sethue("black")
         if show_vals
@@ -166,7 +169,7 @@ function render(grid::Matrix{Float64}, pos::Union{Vector{Int},SVector{2,Int}}, p
         clipreset()
 
     end
-    setline(10)
+    setline(20)
     op = 1/(0.5*length(path1))
     setopacity(min(1, op))
     sethue("blue")
@@ -205,8 +208,4 @@ end
 
 function noisypos2px(pos, dx::Float64, intensity = 10)::Point
     return Point(((reverse(pos) .- 1)*dx .+ dx/2 + rand(-intensity:intensity,2))...)
-end
-
-function convert_pos(pos, board_size::Vector{Int})::Vector{Float64}
-
 end
