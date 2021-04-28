@@ -130,74 +130,23 @@ function mcmc_reward_step(rewards, step_size::Float64, r_min::Float64, r_max::Fl
     return new_rewards
 end
 
-function policy_walk(prior, phi_As, phi_Bs, prefs, alphas, iterations=100050, burn_in = 10000)
-    delta = 1.0
-    rewards = prior
-    reward_samples = (Array{Float64, 1})[]
-    post_old = nothing
-    num_change = 0
-    step_size = 0.2
-    r_min = -1.0
-    r_max = 1.0
-    for i in 1:iterations
-        proposed_rewards = mcmc_reward_step(rewards, step_size, r_min, r_max)
-
-        if post_old == nothing
-            post_old = compute_log_posterior_total(proposed_rewards, phi_As, phi_Bs, prefs, delta, alphas)
-        end
-
-        post_new =  compute_log_posterior_total(proposed_rewards, phi_As, phi_Bs, prefs, delta, alphas)
-        # @show exp(post_new)
-        # if exp(post_new) > 0.7
-            # return [proposed_rewards]
-        # end
-        # if exp(post_new) < 0.3
-        #     println("LESS")
-        # end
-        fraction = exp(post_new - post_old)
-        # @show fraction
-        # @show fraction, exp(post_old), exp(post_new), rewards, proposed_rewards
-        if (rand() < min(1, fraction))
-            num_change += 1
-            if i > burn_in
-                reward_samples = push!(reward_samples,proposed_rewards)
-            end
-            post_old = post_new
-            rewards = copy(proposed_rewards)
-        else
-            if i > burn_in
-                reward_samples = push!(reward_samples,rewards)
-            end
-        end
-    end
-    R = mean(reward_samples)
-    @show R
-    return reward_samples
-end
-
-
-# function policy_walk(prior, phi_A, phi_B, pref, alpha, iterations=100050, burn_in = 10000)
+# function policy_walk(prior, phi_As, phi_Bs, prefs, alphas, iterations=100100, burn_in = 100000)
 #     delta = 1.0
 #     rewards = prior
 #     reward_samples = (Array{Float64, 1})[]
 #     post_old = nothing
 #     num_change = 0
-#     step_size = 0.5
+#     step_size = 0.2
 #     r_min = -1.0
 #     r_max = 1.0
 #     for i in 1:iterations
 #         proposed_rewards = mcmc_reward_step(rewards, step_size, r_min, r_max)
 
 #         if post_old == nothing
-#             post_old = compute_log_posterior(proposed_rewards, phi_A, phi_B, pref, delta, alpha)
+#             post_old = compute_log_posterior_total(proposed_rewards, phi_As, phi_Bs, prefs, delta, alphas)
 #         end
 
-#         post_new =  compute_log_posterior(proposed_rewards, phi_A, phi_B, pref, delta, alpha)
-#         # @show exp(post_new)
-#         # if (exp(post_new) > 0.75)
-#         #     @show post_new, proposed_rewards
-#         #     break
-#         # end
+#         post_new =  compute_log_posterior_total(proposed_rewards, phi_As, phi_Bs, prefs, delta, alphas)
 #         fraction = exp(post_new - post_old)/2
 #         # @show fraction
 #         # @show fraction, exp(post_old), exp(post_new), rewards, proposed_rewards
@@ -215,9 +164,53 @@ end
 #         end
 #     end
 #     R = mean(reward_samples)
-#     @show R
-#     return reward_samples[end]
+#     # @show R
+#     return reward_samples
 # end
+
+
+function policy_walk(prior, phi_A, phi_B, pref, alpha, iterations=100050, burn_in = 10000)
+    delta = 1.0
+    rewards = prior
+    reward_samples = (Array{Float64, 1})[]
+    post_old = nothing
+    num_change = 0
+    step_size = 0.2
+    r_min = -1.0
+    r_max = 1.0
+    for i in 1:iterations
+        proposed_rewards = mcmc_reward_step(rewards, step_size, r_min, r_max)
+
+        if post_old == nothing
+            post_old = compute_log_posterior(proposed_rewards, phi_A, phi_B, pref, delta, alpha)
+        end
+
+        post_new =  compute_log_posterior(proposed_rewards, phi_A, phi_B, pref, delta, alpha)
+        # @show exp(post_new)
+        # if (exp(post_new) > 0.75)
+        #     @show post_new, proposed_rewards
+        #     break
+        # end
+        fraction = exp(post_new - post_old)/2
+        # @show fraction
+        # @show fraction, exp(post_old), exp(post_new), rewards, proposed_rewards
+        if (rand() < min(1, fraction))
+            num_change += 1
+            if i > burn_in
+                reward_samples = push!(reward_samples,proposed_rewards)
+            end
+            post_old = post_new
+            rewards = copy(proposed_rewards)
+        else
+            if i > burn_in
+                reward_samples = push!(reward_samples,rewards)
+            end
+        end
+    end
+    R = mean(reward_samples)
+    # @show R
+    return reward_samples
+end
 
 # prior = rand(4)
 # for i in 1:10000
