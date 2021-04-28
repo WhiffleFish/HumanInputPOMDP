@@ -53,7 +53,7 @@ function query(game::IMGame, mdp_alt::SimpleGridWorld, a_blue::Symbol, a_orange:
         aut_steps = tryparse(Int, input[3])
     else
         println("Invalid Input")
-        (a, confidence, aut_steps) = query(game, mdp_alt, a_blue, a_orange,)
+        (a, confidence, aut_steps) = query(game, mdp_alt, a_blue, a_orange)
     end
 
     if choice == "b"

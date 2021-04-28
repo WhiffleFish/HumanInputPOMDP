@@ -10,7 +10,6 @@ end
 confidence2variance(c::Float64) = -10log(c)
 
 function tree2Qvec(tree::MCTS.MCTSTree{SVector{2, Int64}})::Vector{Float64}
-    @show tree.a_labels[1:4]
     return tree.q[1:4]
 end
 
@@ -80,7 +79,7 @@ function play(game::IMGame, teacher::ScriptedTeacher; show_true=false)
         paths_o = get_trajectories(mdp_alt,tree_orange, 100, 50)
         paths_true = get_trajectories(game.true_mdp,tree_true, 100, 50) # REMOVE
 
-        choice, confidence = query(teacher, game, tree_blue, tree_orange, s)
+        choice, confidence = query(teacher, game, tree_orange, tree_blue, s)
         if choice == "b"
             a = a_blue
             update_rewards!(game, game.pred_mdp, confidence)
@@ -89,9 +88,6 @@ function play(game::IMGame, teacher::ScriptedTeacher; show_true=false)
             update_rewards!(game, mdp_alt, confidence)
             # a, _ = solved_mdp(game.pred_mdp, solver, s)
         end
-        @show a
-        # DO NOT FORGET TO REMOVE THIS!!!!
-        readline()
 
         if show_true
             display(render(true_rewards, s, paths_b, paths_o))
