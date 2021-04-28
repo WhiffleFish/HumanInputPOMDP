@@ -1,7 +1,8 @@
 using POMDPs
 using MCTS
 using StaticArrays
-include("mdp.jl")
+using POMDPModels
+# include("mdp.jl") -> breaks everything
 
 function get_trajectory(mdp::SimpleGridWorld, tree::MCTS.MCTSTree{SVector{2, Int64}, Symbol}, d::Int)::Vector{SVector{2, Int64}}
     root = first(tree.s_labels)
