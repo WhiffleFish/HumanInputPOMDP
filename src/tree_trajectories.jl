@@ -1,7 +1,8 @@
 using POMDPs
 using MCTS
 using StaticArrays
-include("mdp.jl")
+using Distributions
+using POMDPModels
 
 function get_trajectory(mdp::SimpleGridWorld, tree::MCTS.MCTSTree{SVector{2, Int64}, Symbol}, d::Int)::Vector{SVector{2, Int64}}
     root = first(tree.s_labels)
@@ -73,6 +74,7 @@ function meanMDP(belief::Array{Array{Float64,1},1}, reward_ranges::Array{Tuple{F
     new_mdp = SimpleGridWorld()
     reward = mean(belief)
     i = 1
+    @show reward, new_mdp.rewards
     for (k,v) in new_mdp.rewards
         new_mdp.rewards[k] = reward[i]*15.0 + sum(reward_ranges[i])/2.0
         i += 1
@@ -80,8 +82,31 @@ function meanMDP(belief::Array{Array{Float64,1},1}, reward_ranges::Array{Tuple{F
     return new_mdp, reward
 end
 
+function genBetaMDP(belief::Array{Array{Float64,1},1}, reward_ranges::Array{Tuple{Float64, Float64}, 1}, std::Float64=10.0)
+    new_mdp = SimpleGridWorld()
+    reward = mean(belief)
+    i = 1
+    for (k,v) in new_mdp.rewards
+        new_mdp.rewards[k] = (reward[i]*15.0 + sum(reward_ranges[i])/2.0) + rand_from_beta(std)
+        reward[i] = new_mdp.rewards[k]
+        i += 1
+    end
+    return new_mdp, reward
+end
+
+function genBetafromPostMDP(belief::Array{Array{Float64,1},1})
+    new_mdp = SimpleGridWorld()
+    index = floor(Int, rand((Beta(0.5,0.5)))*length(belief))
+    return belief[index]
+end
+
 function solved_mdp(mdp::SimpleGridWorld, solver::MCTSSolver, s0::SVector{2, Int})
     planner = solve(solver, mdp)
     a, info = action_info(planner, s0)
     return a,info[:tree]
+end
+
+function rand_from_beta(std::Float64)
+    temp = (rand((Beta(0.5,0.5)))*2 - 1)
+    return temp*std
 end
