@@ -42,7 +42,7 @@ end
 function genMDP(mdp::SimpleGridWorld = SimpleGridWorld(), std::Float64=10.0)::SimpleGridWorld
     new_mdp = SimpleGridWorld()
     for (k,v) in mdp.rewards
-        new_mdp.rewards[k] += randn()*std
+        new_mdp.rewards[k] = v + randn()*std
     end
     return new_mdp
 end
@@ -94,6 +94,14 @@ function genBetaMDP(belief::Array{Array{Float64,1},1}, reward_ranges::Array{Tupl
     return new_mdp, reward
 end
 
+function genBetaMDP(mdp::SimpleGridWorld, std::Float64=10.0)::SimpleGridWorld
+    new_mdp = SimpleGridWorld()
+    for (k,v) in mdp.rewards
+        new_mdp.rewards[k] = v + rand_from_beta(std)
+    end
+    return new_mdp
+end
+
 function genBetafromPostMDP(belief::Array{Array{Float64,1},1})
     new_mdp = SimpleGridWorld()
     index = floor(Int, rand((Beta(0.5,0.5)))*length(belief))
@@ -107,6 +115,6 @@ function solved_mdp(mdp::SimpleGridWorld, solver::MCTSSolver, s0::SVector{2, Int
 end
 
 function rand_from_beta(std::Float64)
-    temp = (rand((Beta(0.5,0.5)))*2 - 1)
+    temp = rand(Beta(0.5,0.5))*2 - 1
     return temp*std
 end

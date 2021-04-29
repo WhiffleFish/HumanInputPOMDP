@@ -28,15 +28,8 @@ function query(teacher::ScriptedTeacher, game::IMGame, alt_tree::MCTS.MCTSTree{S
     alt_Q = tree2Qvec(alt_tree)
     pred_Q = tree2Qvec(pred_tree)
 
-    @show teach_Q
-    @show alt_Q
-    @show pred_Q
-
     alt_diff = normdiff(teach_Q, alt_Q)
     pred_diff = normdiff(teach_Q, pred_Q)
-
-    @show alt_diff
-    @show pred_diff
 
     #=
     Confidence in a trajectory is inversely proportional to how much it differs
@@ -44,11 +37,9 @@ function query(teacher::ScriptedTeacher, game::IMGame, alt_tree::MCTS.MCTSTree{S
     =#
     if alt_diff < pred_diff
         choice_confidence = round(Int,10*(1.0 - alt_diff)^2)
-        @show choice_confidence
         return "o",choice_confidence
     else
         choice_confidence = min(3,round(Int,10*(1.0 - pred_diff)^2))
-        @show choice_confidence
         return "b", choice_confidence
     end
     # If difference between predicted Q values are
@@ -71,28 +62,28 @@ function play(game::IMGame, teacher::ScriptedTeacher; show_true=false)
             println("Final Score: $total_reward")
             break
         end
-        a_true, tree_true = solved_mdp(game.true_mdp, solver, s) # REMOVE
-        mdp_alt = genMDP(game.pred_mdp, game.reward_variance)
+        # a_true, tree_true = solved_mdp(game.true_mdp, solver, s) # REMOVE
+        mdp_alt = genBetaMDP(game.pred_mdp, game.reward_variance)
         a_blue, tree_blue = solved_mdp(game.pred_mdp, solver, s)
         a_orange, tree_orange = solved_mdp(mdp_alt, solver, s)
         paths_b = get_trajectories(game.pred_mdp,tree_blue, 100, 50)
         paths_o = get_trajectories(mdp_alt,tree_orange, 100, 50)
-        paths_true = get_trajectories(game.true_mdp,tree_true, 100, 50) # REMOVE
+        # paths_true = get_trajectories(game.true_mdp,tree_true, 100, 50) # REMOVE
 
         choice, confidence = query(teacher, game, tree_orange, tree_blue, s)
         if choice == "b"
             a = a_blue
             update_rewards!(game, game.pred_mdp, confidence)
         else
-            a = a_orange
+            # a = a_orange
             update_rewards!(game, mdp_alt, confidence)
-            # a, _ = solved_mdp(game.pred_mdp, solver, s)
+            a, _ = solved_mdp(game.pred_mdp, solver, s)
         end
 
         if show_true
             display(render(true_rewards, s, paths_b, paths_o))
         else
-            display(render(reward_grid(game.pred_mdp), s, paths_b, paths_o, paths_true))
+            display(render(reward_grid(game.pred_mdp), s, paths_b, paths_o))
         end
 
         s,r = @gen(:sp,:r)(game.true_mdp,s,a)

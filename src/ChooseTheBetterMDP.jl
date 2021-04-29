@@ -135,7 +135,7 @@ function play(game::IMGame; show_true=false)::Float64
         #User Input
         if aut_steps <= 0
 
-            mdp_alt = genMDP(game.pred_mdp, game.reward_variance)
+            mdp_alt = genBetaMDP(game.pred_mdp, game.reward_variance)
             a_blue, tree_blue = solved_mdp(game.pred_mdp, solver, s)
             a_orange, tree_orange = solved_mdp(mdp_alt, solver, s)
             paths_b = get_trajectories(game.pred_mdp,tree_blue, 100, 50)
