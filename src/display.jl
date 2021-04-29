@@ -127,7 +127,7 @@ function render(grid::Matrix{Float64}, pos::Union{Vector{Int},SVector{2,Int}}, p
     preview()
 end
 
-function render(grid::Matrix{Float64}, pos::Union{Vector{Int},SVector{2,Int}}, path1::Vector{Vector{SVector{2,Int64}}}, path2::Vector{Vector{SVector{2,Int64}}}; show_vals::Bool=true)
+function render(grid::Matrix{Float64}, pos::Union{Vector{Int},SVector{2,Int}}, path1::Vector{Vector{SVector{2,Int64}}}, path2::Vector{Vector{SVector{2,Int64}}}, path3::Vector{Vector{SVector{2,Int64}}}; show_vals::Bool=true)
     s = [500,500]
     term_state = SA[-1,-1]
     ds = 500/10
