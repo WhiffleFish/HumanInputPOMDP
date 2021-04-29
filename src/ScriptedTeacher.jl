@@ -72,11 +72,11 @@ function query(teacher::ScriptedTeacher,
     from your given optimal trajectory
     =#
     if alt_diff < pred_diff
-        choice_confidence = alt_diff
+        choice_confidence = clamp(maximum(teach_r) - alt_r[r_max_idx],0,1)
         choice_confidence = round(Int,10*choice_confidence)
         return "o",choice_confidence, done
     else
-        choice_confidence = pred_diff
+        choice_confidence = clamp(maximum(teach_r) - pred_r[r_max_idx],0,1)
         choice_confidence = round(Int,10*choice_confidence)
         return "b", choice_confidence, done
     end
@@ -122,7 +122,7 @@ function play(game::IMGame, teacher::ScriptedTeacher; show_true=false, deltaR::F
             paths_o = get_trajectories(mdp_alt,tree_orange, 100, 50)
 
             choice, confidence, done_querying = query(teacher, game, tree_orange, tree_blue, s, deltaR, mdp_alt, alpha)
-            confidence = 10
+            # confidence = 10
             # @show choice
             # @show confidence
             # @show done_querying

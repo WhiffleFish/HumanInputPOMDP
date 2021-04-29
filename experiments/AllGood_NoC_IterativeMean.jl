@@ -5,6 +5,7 @@ include("../src/ScriptedTeacher.jl")
 include("../src/mdp.jl")
 using ProgressMeter
 using JLD
+using LinearAlgebra
 mdp = AllGoodSimpleGridWorld()
 
 rewards = []
@@ -26,7 +27,7 @@ mean(rewards)
 
 results = Dict(:rewards=>rewards, :cutoffs=>cutoffs, :n_iters=>n_iters)
 # save("../results/OneGood_WithC_IterativeMean.jld", "results", results)
-save("TwoGood_WithC_IterativeMean2.jld", "results", results)
+save("AllGood_WithC_IterativeMean.jld", "results", results)
 
 maximum(rewards)
 
