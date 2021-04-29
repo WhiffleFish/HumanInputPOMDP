@@ -185,13 +185,6 @@ function render(grid::Matrix{Float64}, pos::Union{Vector{Int},SVector{2,Int}}, p
         pts = map(x->noisypos2px(x,ds), path)
         poly(pts, :stroke)
     end
-     # REMOVE
-    sethue("black")
-    for path in path3
-        filter!(pt -> pt != term_state, path)
-        pts = map(x->noisypos2px(x,ds), path)
-        poly(pts, :stroke)
-    end
 
     finish()
     preview()

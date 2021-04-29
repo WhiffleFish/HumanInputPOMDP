@@ -3,6 +3,7 @@ using MCTS
 using StaticArrays
 using Distributions
 using POMDPModels
+using Random
 
 function get_trajectory(mdp::SimpleGridWorld, tree::MCTS.MCTSTree{SVector{2, Int64}, Symbol}, d::Int)::Vector{SVector{2, Int64}}
     root = first(tree.s_labels)
@@ -40,9 +41,19 @@ function get_trajectories(mdp::SimpleGridWorld, tree::MCTS.MCTSTree{SVector{2, I
 end
 
 function genMDP(mdp::SimpleGridWorld = SimpleGridWorld(), std::Float64=10.0)::SimpleGridWorld
-    new_mdp = SimpleGridWorld()
+    new_mdp = SimpleGridWorld(rewards=copy(mdp.rewards),tprob = mdp.tprob)
     for (k,v) in mdp.rewards
-        new_mdp.rewards[k] += randn()*std
+        new_mdp.rewards[k] = v + randn()*std
+    end
+    return new_mdp
+end
+
+function genPermMDP(mdp::SimpleGridWorld, std::Float64=10.0)::SimpleGridWorld
+    new_mdp = SimpleGridWorld(rewards=copy(mdp.rewards))
+    r = collect(values(mdp.rewards))
+    r = shuffle(r).*rand([-1,1], length(r))
+    for (i,k) in enumerate(keys(mdp.rewards))
+        new_mdp.rewards[k] = rand(Normal(r[i],std))
     end
     return new_mdp
 end
@@ -94,6 +105,21 @@ function genBetaMDP(belief::Array{Array{Float64,1},1}, reward_ranges::Array{Tupl
     return new_mdp, reward
 end
 
+function genBetaMDP(mdp::SimpleGridWorld, std::Float64=10.0)::SimpleGridWorld
+    new_mdp = SimpleGridWorld(rewards=copy(mdp.rewards))
+    r = collect(values(mdp.rewards))
+    shuffle!(r)
+    for (i,k) in enumerate(keys(mdp.rewards))
+        new_mdp.rewards[k] = r[i] + rand_from_beta(std)
+    end
+    return new_mdp
+end
+
+function initMDP(mdp::SimpleGridWorld)
+    d = Dict(k=>(rand()-0.5)*30 for k in keys(mdp.rewards))
+    return SimpleGridWorld(rewards=d, tprob=mdp.tprob)
+end
+
 function genBetafromPostMDP(belief::Array{Array{Float64,1},1})
     new_mdp = SimpleGridWorld()
     index = floor(Int, rand((Beta(0.5,0.5)))*length(belief))
@@ -107,6 +133,6 @@ function solved_mdp(mdp::SimpleGridWorld, solver::MCTSSolver, s0::SVector{2, Int
 end
 
 function rand_from_beta(std::Float64)
-    temp = (rand((Beta(0.5,0.5)))*2 - 1)
+    temp = rand(Beta(0.5,0.5))*2 - 1
     return temp*std
 end

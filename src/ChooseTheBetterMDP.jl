@@ -18,7 +18,7 @@ end
     max_steps::Int = 30
     true_mdp::SimpleGridWorld = SimpleGridWorld()
     reward_variance::Float64 = 5.0
-    pred_mdp::SimpleGridWorld = genMDP(true_mdp, reward_variance)
+    pred_mdp::SimpleGridWorld = initMDP(true_mdp)
     C::Int = 1 # Start at 1 to prevent NaN if first input is 0 confidence
 end
 
@@ -135,7 +135,7 @@ function play(game::IMGame; show_true=false)::Float64
         #User Input
         if aut_steps <= 0
 
-            mdp_alt = genMDP(game.pred_mdp, game.reward_variance)
+            mdp_alt = genBetaMDP(game.pred_mdp, game.reward_variance)
             a_blue, tree_blue = solved_mdp(game.pred_mdp, solver, s)
             a_orange, tree_orange = solved_mdp(mdp_alt, solver, s)
             paths_b = get_trajectories(game.pred_mdp,tree_blue, 100, 50)
@@ -169,13 +169,13 @@ function update_rewards!(game::IMGame, mdp::SimpleGridWorld, confidence::Int)::N
     # @show game.pred_mdp.rewards
     game.C += confidence
     if (mdp != game.pred_mdp)
-        println("Orange Chosen")
+        # println("Orange Chosen")
         for (k,v) in game.pred_mdp.rewards # Incremental Avg Update
             game.pred_mdp.rewards[k] = game.pred_mdp.rewards[k] + (confidence/game.C)*(mdp.rewards[k] - game.pred_mdp.rewards[k])
         end
         # @show mdp.rewards
     else
-        println("Blue Chosen")
+        # println("Blue Chosen")
     end
     # @show game.pred_mdp.rewards
     nothing

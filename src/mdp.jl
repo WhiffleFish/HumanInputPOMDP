@@ -15,13 +15,13 @@ end
 
 
 function OneGoodSimpleGridWorld()
-    rewards = Dict(GWPos(4,3)=>-10.0, GWPos(4,6)=>-5.0, GWPos(9,3)=>10.0, GWPos(8,8)=>-3.0)
+    rewards = Dict(GWPos(2,2)=> -6.0, GWPos(2,10)=> -5.0, GWPos(10,2)=>10.0, GWPos(10,10)=>-7.0)
     tprob = 0.8
     return SimpleGridWorld(rewards=rewards, tprob=tprob)
 end
 
 function TwoGoodSimpleGridWorld()
-    rewards = Dict(GWPos(4,3)=>-10.0, GWPos(4,6)=>-5.0, GWPos(9,3)=>10.0, GWPos(8,8)=> 5.0)
+    rewards = Dict(GWPos(2,2)=>-10.0, GWPos(2,10)=> 5.0, GWPos(10,2)=>10.0, GWPos(10,10)=> -5.0)
     tprob = 0.8
     return SimpleGridWorld(rewards=rewards, tprob=tprob)
 end
