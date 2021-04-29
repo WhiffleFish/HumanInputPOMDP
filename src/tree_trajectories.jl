@@ -3,6 +3,7 @@ using MCTS
 using StaticArrays
 using Distributions
 using POMDPModels
+using Random
 
 function get_trajectory(mdp::SimpleGridWorld, tree::MCTS.MCTSTree{SVector{2, Int64}, Symbol}, d::Int)::Vector{SVector{2, Int64}}
     root = first(tree.s_labels)
@@ -95,9 +96,11 @@ function genBetaMDP(belief::Array{Array{Float64,1},1}, reward_ranges::Array{Tupl
 end
 
 function genBetaMDP(mdp::SimpleGridWorld, std::Float64=10.0)::SimpleGridWorld
-    new_mdp = SimpleGridWorld()
-    for (k,v) in mdp.rewards
-        new_mdp.rewards[k] = v + rand_from_beta(std)
+    new_mdp = SimpleGridWorld(rewards=mdp.rewards)
+    r = collect(values(mdp.rewards))
+    shuffle!(r)
+    for (i,k) in enumerate(keys(mdp.rewards))
+        new_mdp.rewards[k] = r[i] + rand_from_beta(std)
     end
     return new_mdp
 end
