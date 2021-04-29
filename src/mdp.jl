@@ -37,3 +37,9 @@ function TwoTerminalSimpleGridWorld()
     tprob = 0.8
     return SimpleGridWorld(rewards=rewards, tprob=tprob)
 end
+
+function AllGoodSimpleGridWorld()
+    rewards = Dict(GWPos(2,2)=> 1.0, GWPos(2,10)=> 5.0, GWPos(10,2)=>13.0, GWPos(10,10)=>3.0)
+    tprob = 0.8
+    return SimpleGridWorld(rewards=rewards, tprob=tprob)
+end

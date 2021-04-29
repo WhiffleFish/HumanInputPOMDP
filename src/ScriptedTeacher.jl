@@ -72,11 +72,11 @@ function query(teacher::ScriptedTeacher,
     from your given optimal trajectory
     =#
     if alt_diff < pred_diff
-        choice_confidence = alpha*(altpred_diff) + (1-alpha)*(alt_diff)
+        choice_confidence = alt_diff
         choice_confidence = round(Int,10*choice_confidence)
         return "o",choice_confidence, done
     else
-        choice_confidence = alpha*(altpred_diff) + (1-alpha)*(pred_diff)
+        choice_confidence = pred_diff
         choice_confidence = round(Int,10*choice_confidence)
         return "b", choice_confidence, done
     end

@@ -171,8 +171,8 @@ function update_rewards!(game::IMGame, mdp::SimpleGridWorld, confidence::Int)::N
     if (mdp != game.pred_mdp)
         # println("Orange Chosen")
         for (k,v) in game.pred_mdp.rewards # Incremental Avg Update
-            # game.pred_mdp.rewards[k] = game.pred_mdp.rewards[k] + (confidence*0.2/log(game.C+1))*(mdp.rewards[k] - game.pred_mdp.rewards[k])
-            game.pred_mdp.rewards[k] = game.pred_mdp.rewards[k] + (confidence/game.C)*(mdp.rewards[k] - game.pred_mdp.rewards[k])
+            game.pred_mdp.rewards[k] = game.pred_mdp.rewards[k] + (confidence*1.0/log(game.C+1))*(mdp.rewards[k] - game.pred_mdp.rewards[k])
+            # game.pred_mdp.rewards[k] = game.pred_mdp.rewards[k] + (confidence/game.C)*(mdp.rewards[k] - game.pred_mdp.rewards[k])
         end
         # @show mdp.rewards
     else
