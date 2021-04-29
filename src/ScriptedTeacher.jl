@@ -58,11 +58,11 @@ function query(teacher::ScriptedTeacher,
     pred_diff = normdiff(teach_r, pred_r)
 
     altpred_diff = normdiff(alt_r, pred_r)
-    @show teach_r
-    @show pred_r
-    @show alt_r
-    @show alt_diff_r
-    @show pred_diff_r
+    # @show teach_r
+    # @show pred_r
+    # @show alt_r
+    # @show alt_diff_r
+    # @show pred_diff_r
 
     # Stop querying if diff between ideal R and predicted R is sufficiently low
     done = normdiff(teach_r,pred_r) < deltaR
@@ -105,11 +105,11 @@ function play(game::IMGame, teacher::ScriptedTeacher; show_true=false, deltaR::F
     i = 0
     while i < steps
         i += 1
-        println("\nStep: $i")
+        # println("\nStep: $i")
 
         if isterminal(game.true_mdp, s)
-            println("Game over")
-            println("Final Score: $total_reward")
+            # println("Game over")
+            # println("Final Score: $total_reward")
             break
         end
 
@@ -117,15 +117,15 @@ function play(game::IMGame, teacher::ScriptedTeacher; show_true=false, deltaR::F
         paths_b = get_trajectories(game.pred_mdp,tree_blue, 100, 50)
 
         if !done_querying
-            mdp_alt = genBetaMDP(game.pred_mdp, game.reward_variance*2)
+            mdp_alt = genPermMDP(game.pred_mdp, game.reward_variance)
             a_orange, tree_orange = solved_mdp(mdp_alt, solver, s)
             paths_o = get_trajectories(mdp_alt,tree_orange, 100, 50)
 
             choice, confidence, done_querying = query(teacher, game, tree_orange, tree_blue, s, deltaR, mdp_alt, alpha)
             # confidence = 10
-            @show choice
-            @show confidence
-            @show done_querying
+            # @show choice
+            # @show confidence
+            # @show done_querying
 
             if done_querying; confident_point = i end
 
@@ -152,8 +152,6 @@ function play(game::IMGame, teacher::ScriptedTeacher; show_true=false, deltaR::F
                 display(render(reward_grid(game.pred_mdp), s, paths_b))
             end
         end
-        @show a
-        readline()
         s,r = @gen(:sp,:r)(game.true_mdp,s,a)
         total_reward += r*γ^(i-1)
     end

@@ -41,9 +41,19 @@ function get_trajectories(mdp::SimpleGridWorld, tree::MCTS.MCTSTree{SVector{2, I
 end
 
 function genMDP(mdp::SimpleGridWorld = SimpleGridWorld(), std::Float64=10.0)::SimpleGridWorld
-    new_mdp = SimpleGridWorld()
+    new_mdp = SimpleGridWorld(rewards=copy(mdp.rewards),tprob = mdp.tprob)
     for (k,v) in mdp.rewards
         new_mdp.rewards[k] = v + randn()*std
+    end
+    return new_mdp
+end
+
+function genPermMDP(mdp::SimpleGridWorld, std::Float64=10.0)::SimpleGridWorld
+    new_mdp = SimpleGridWorld(rewards=copy(mdp.rewards))
+    r = collect(values(mdp.rewards))
+    shuffle!(r)
+    for (i,k) in enumerate(keys(mdp.rewards))
+        new_mdp.rewards[k] = rand(Normal(r[i],std))
     end
     return new_mdp
 end
