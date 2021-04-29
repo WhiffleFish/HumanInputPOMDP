@@ -18,7 +18,7 @@ end
     max_steps::Int = 30
     true_mdp::SimpleGridWorld = SimpleGridWorld()
     reward_variance::Float64 = 5.0
-    pred_mdp::SimpleGridWorld = genMDP(true_mdp, reward_variance)
+    pred_mdp::SimpleGridWorld = initMDP(true_mdp)
     C::Int = 1 # Start at 1 to prevent NaN if first input is 0 confidence
 end
 

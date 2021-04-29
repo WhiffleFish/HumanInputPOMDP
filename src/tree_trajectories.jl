@@ -96,13 +96,18 @@ function genBetaMDP(belief::Array{Array{Float64,1},1}, reward_ranges::Array{Tupl
 end
 
 function genBetaMDP(mdp::SimpleGridWorld, std::Float64=10.0)::SimpleGridWorld
-    new_mdp = SimpleGridWorld(rewards=mdp.rewards)
+    new_mdp = SimpleGridWorld(rewards=copy(mdp.rewards))
     r = collect(values(mdp.rewards))
     shuffle!(r)
     for (i,k) in enumerate(keys(mdp.rewards))
         new_mdp.rewards[k] = r[i] + rand_from_beta(std)
     end
     return new_mdp
+end
+
+function initMDP(mdp::SimpleGridWorld)
+    d = Dict(k=>(rand()-0.5)*30 for k in keys(mdp.rewards))
+    return SimpleGridWorld(rewards=d, tprob=mdp.tprob)
 end
 
 function genBetafromPostMDP(belief::Array{Array{Float64,1},1})

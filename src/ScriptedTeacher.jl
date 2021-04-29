@@ -45,20 +45,24 @@ function query(teacher::ScriptedTeacher,
     # pred_diff = normdiff(teach_Q, pred_Q)
     # altpred_diff = normdiff(alt_Q, pred_Q)
 
+    teach_r = normalize(collect(values(teach_mdp.rewards)))
+    r_max_idx = argmax(teach_r)
 
+    pred_r = normalize(collect(values(game.pred_mdp.rewards)))
+    alt_r = normalize(collect(values(alt_mdp.rewards)))
 
-    teach_r = collect(values(teach_mdp.rewards))
-    pred_r = collect(values(game.pred_mdp.rewards))
-    alt_r = collect(values(alt_mdp.rewards))
+    alt_diff_r = 1.0 - alt_r[r_max_idx]
+    pred_diff_r = 1.0 - pred_r[r_max_idx]
 
     alt_diff = normdiff(teach_r, alt_r)
     pred_diff = normdiff(teach_r, pred_r)
+
     altpred_diff = normdiff(alt_r, pred_r)
     @show teach_r
     @show pred_r
     @show alt_r
-    @show alt_diff
-    @show pred_diff
+    @show alt_diff_r
+    @show pred_diff_r
 
     # Stop querying if diff between ideal R and predicted R is sufficiently low
     done = normdiff(teach_r,pred_r) < deltaR
