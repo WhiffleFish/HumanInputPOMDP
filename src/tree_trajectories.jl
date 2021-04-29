@@ -51,7 +51,7 @@ end
 function genPermMDP(mdp::SimpleGridWorld, std::Float64=10.0)::SimpleGridWorld
     new_mdp = SimpleGridWorld(rewards=copy(mdp.rewards))
     r = collect(values(mdp.rewards))
-    shuffle!(r)
+    r = shuffle(r).*rand([-1,1], length(r))
     for (i,k) in enumerate(keys(mdp.rewards))
         new_mdp.rewards[k] = rand(Normal(r[i],std))
     end
