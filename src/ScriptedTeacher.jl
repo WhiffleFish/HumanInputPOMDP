@@ -65,7 +65,7 @@ function query(teacher::ScriptedTeacher,
     # @show pred_diff_r
 
     # Stop querying if diff between ideal R and predicted R is sufficiently low
-    done = normdiff(teach_r,pred_r) < deltaR
+    done = 1.0 - dot(teach_r,pred_r) < deltaR
 
     #=
     Confidence in a trajectory is inversely proportional to how much it differs
@@ -122,7 +122,7 @@ function play(game::IMGame, teacher::ScriptedTeacher; show_true=false, deltaR::F
             paths_o = get_trajectories(mdp_alt,tree_orange, 100, 50)
 
             choice, confidence, done_querying = query(teacher, game, tree_orange, tree_blue, s, deltaR, mdp_alt, alpha)
-            # confidence = 10
+            confidence = 10
             # @show choice
             # @show confidence
             # @show done_querying

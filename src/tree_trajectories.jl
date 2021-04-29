@@ -53,7 +53,7 @@ function genPermMDP(mdp::SimpleGridWorld, std::Float64=10.0)::SimpleGridWorld
     r = collect(values(mdp.rewards))
     r = shuffle(r).*rand([-1,1], length(r))
     for (i,k) in enumerate(keys(mdp.rewards))
-        new_mdp.rewards[k] = rand(Normal(r[i],std))
+        new_mdp.rewards[k] = clamp(rand(Normal(r[i],std)),-15.0, 15.0)
     end
     return new_mdp
 end
@@ -116,7 +116,7 @@ function genBetaMDP(mdp::SimpleGridWorld, std::Float64=10.0)::SimpleGridWorld
 end
 
 function initMDP(mdp::SimpleGridWorld)
-    d = Dict(k=>(rand()-0.5)*30 for k in keys(mdp.rewards))
+    d = Dict(k=>(rand()-0.75)*5 for k in keys(mdp.rewards))
     return SimpleGridWorld(rewards=d, tprob=mdp.tprob)
 end
 
